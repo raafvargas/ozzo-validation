@@ -134,6 +134,11 @@ func FieldWithCustomError(fieldPtr interface{}, customError CustomError, rules .
 	}
 }
 
+//NewCustomError creates a new CustomError struct
+func NewCustomError(code string, message string) CustomError {
+	return CustomError{code: code, message: errors.New(message)}
+}
+
 // findStructField looks for a field in the given struct.
 // The field being looked for should be a pointer to the actual struct field.
 // If found, the field info will be returned. Otherwise, nil will be returned.

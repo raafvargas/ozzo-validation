@@ -5,7 +5,6 @@
 package validation
 
 import (
-	"errors"
 	"reflect"
 	"testing"
 
@@ -147,8 +146,8 @@ func TestValidateStructWithCustomError(t *testing.T) {
 	}{
 		// empty rules
 		{"t1.1", &m4, []*FieldRules{}, ""},
-		{"t1.2", &m4, []*FieldRules{FieldWithCustomError(&m4.B, CustomError{code: "1", message: errors.New("m4.A cannot be empty")}, Required, NilOrNotEmpty)}, "1: m4.A cannot be empty."},
-		{"t1.3", &m4, []*FieldRules{FieldWithCustomError(&m4.A, CustomError{code: "2", message: errors.New("m4.B must be gt 0")}, Min(0))}, "2: m4.B must be gt 0."},
+		{"t1.2", &m4, []*FieldRules{FieldWithCustomError(&m4.B, NewCustomError("1", "m4.A cannot be empty"), Required, NilOrNotEmpty)}, "1: m4.A cannot be empty."},
+		{"t1.3", &m4, []*FieldRules{FieldWithCustomError(&m4.A, NewCustomError("2", "m4.B must be gt 0"), Min(0))}, "2: m4.B must be gt 0."},
 
 		// normal rules
 		// {"t2.1", &m1, []*FieldRules{FieldWithCustomError(&m1.A, CustomError{code: "1", message: errors.New("Error 1")}, &validateAbc{})}, ""},
