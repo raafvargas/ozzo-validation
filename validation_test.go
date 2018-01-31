@@ -138,6 +138,12 @@ type Model3 struct {
 	A string
 }
 
+type Model4 struct {
+	A int
+	B string
+	C Model3
+}
+
 func (m Model3) Validate() error {
 	return ValidateStruct(&m,
 		Field(&m.A, &validateAbc{}),

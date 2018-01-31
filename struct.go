@@ -25,8 +25,15 @@ type (
 
 	// FieldRules represents a rule set associated with a struct field.
 	FieldRules struct {
-		fieldPtr interface{}
-		rules    []Rule
+		fieldPtr    interface{}
+		rules       []Rule
+		customError CustomError
+	}
+
+	// CustomError represents a validation with a custom error code and message.
+	CustomError struct {
+		code    string
+		message error
 	}
 )
 
@@ -94,6 +101,10 @@ func ValidateStruct(structPtr interface{}, fields ...*FieldRules) error {
 					continue
 				}
 			}
+			if fr.customError.message != nil {
+				errs[getCustomErrorName(fr.customError, ft)] = fr.customError.message
+				continue
+			}
 			errs[getErrorFieldName(ft)] = err
 		}
 	}
@@ -110,6 +121,16 @@ func Field(fieldPtr interface{}, rules ...Rule) *FieldRules {
 	return &FieldRules{
 		fieldPtr: fieldPtr,
 		rules:    rules,
+	}
+}
+
+// FieldWithCustomError specifies a struct field and the corresponding validation rules with a error code and message.
+// The struct field must be specified as a pointer to it.
+func FieldWithCustomError(fieldPtr interface{}, customError CustomError, rules ...Rule) *FieldRules {
+	return &FieldRules{
+		fieldPtr:    fieldPtr,
+		rules:       rules,
+		customError: customError,
 	}
 }
 
@@ -151,4 +172,12 @@ func getErrorFieldName(f *reflect.StructField) string {
 		}
 	}
 	return f.Name
+}
+
+// getCustomErrorName a custom error name  to represent the validation error of a struct field.
+func getCustomErrorName(customError CustomError, f *reflect.StructField) string {
+	if customError.code != "" {
+		return customError.code
+	}
+	return getErrorFieldName(f)
 }

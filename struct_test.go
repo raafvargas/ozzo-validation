@@ -5,6 +5,7 @@
 package validation
 
 import (
+	"errors"
 	"reflect"
 	"testing"
 
@@ -133,5 +134,27 @@ func TestValidateStruct(t *testing.T) {
 	)
 	if assert.NotNil(t, err) {
 		assert.Equal(t, "Value: the length must be between 5 and 10.", err.Error())
+	}
+}
+
+func TestValidateStructWithCustomError(t *testing.T) {
+	m4 := Model4{B: "", A: -1, C: Model3{A: "asdas"}}
+	tests := []struct {
+		tag   string
+		model interface{}
+		rules []*FieldRules
+		err   string
+	}{
+		// empty rules
+		{"t1.1", &m4, []*FieldRules{}, ""},
+		{"t1.2", &m4, []*FieldRules{FieldWithCustomError(&m4.B, CustomError{code: "1", message: errors.New("m4.A cannot be empty")}, Required, NilOrNotEmpty)}, "1: m4.A cannot be empty."},
+		{"t1.3", &m4, []*FieldRules{FieldWithCustomError(&m4.A, CustomError{code: "2", message: errors.New("m4.B must be gt 0")}, Min(0))}, "2: m4.B must be gt 0."},
+
+		// normal rules
+		// {"t2.1", &m1, []*FieldRules{FieldWithCustomError(&m1.A, CustomError{code: "1", message: errors.New("Error 1")}, &validateAbc{})}, ""},
+	}
+	for _, test := range tests {
+		err := ValidateStruct(test.model, test.rules...)
+		assertError(t, test.err, err, test.tag)
 	}
 }
